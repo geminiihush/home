@@ -1,47 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Astrology by John Smith</title>
+  <meta charset="UTF-8">
+  <title>John Smith - Astrologer</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background: #f5f5f5;
-      color: #333;
+      font-family: sans-serif;
+      background: #000;
+      color: #fff;
+      text-align: center;
     }
     header {
-      background-color: #4b0082;
-      color: white;
-      padding: 40px 20px;
-      text-align: center;
-    }
-    section {
-      padding: 30px 20px;
-      max-width: 800px;
-      margin: auto;
-      background: white;
-    }
-    h1, h2 {
-      margin-top: 0;
-    }
-    footer {
-      text-align: center;
       padding: 20px;
-      font-size: 0.9em;
-      color: #aaa;
+      background: #111;
+    }
+    canvas {
+      background: #000;
+      display: block;
+      margin: 20px auto;
+      border: 2px solid #fff;
     }
   </style>
 </head>
 <body>
-
   <header>
-    <h1>Astrology by John Smith</h1>
-    <p>Personalized guidance through the stars</p>
+    <h1>John Smith - Astrologer</h1>
+    <p>Explore the stars... and blast some invaders!</p>
+    <p>Controls: G = Left, H = Right, SPACE = Fire</p>
   </header>
 
-  <section>
-    <h2>About John</h2>
-    <p>John Smith is a lifelong student of the stars with over 20 years of experience in astrology. He offers personalized readings, birth chart analysis, and cosmic guidance to help you understand your path in life.</p>
-    <p>John's philosophy blends traditiona
+  <canvas id="game" width="400" height="300"></canvas>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    let player = { x: 180, y: 270, w: 40, h: 10 };
+    let bullets = [];
+    let invaders = [];
+    let keys = {};
+
+    for (let i = 0; i < 6; i++) {
+      invaders.push({ x: i * 60 + 20, y: 30, w: 30, h: 15 });
+    }
+
+    document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+    document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+    function update() {
+      // Move player
+      if (keys["g"] && player.x > 0) player.x -= 4;
+      if (keys["h"] && player.x < canvas.width - player.w) player.x += 4;
+
+      // Fire bullet
+      if (keys[" "] && !bullets.length) {
+        bullets.push({ x: player.x + player.w / 2 - 2, y: player.y - 10 });
+      }
+
+      // Update bullets
+      bullets.forEach(b => b.y -= 5);
+      bullets = bullets.filter(b => b.y > 0);
+
+      // Collision detection
+      invaders = invaders.filter(inv => {
+        return !bullets.some(b => b.x < inv.x + inv.w && b.x + 4 > inv.x && b.y < inv.y + inv.h && b.y + 10 > inv.y);
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw player
+      ctx.fillStyle = "#0f0";
+      ctx.fillRect(player.x, player.y, player.w, player.h);
+
+      // Draw bullets
+      ctx.fillStyle = "#ff0";
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, 4, 10));
+
+      // Draw invaders
+      ctx.fillStyle = "#f00";
+      invaders.forEach(inv => ctx.fillRect(inv.x, inv.y, inv.w, inv.h));
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
